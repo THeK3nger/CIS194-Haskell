@@ -1,6 +1,8 @@
 {-# OPTIONS_GHC -Wall #-}
 module HW02 where
 
+import Control.Monad
+
 -- Mastermind -----------------------------------------
 
 -- A peg can be one of six colors
@@ -32,37 +34,65 @@ exactMatches _ _ = 0
 
 -- For each peg in xs, count how many times is occurs in ys
 countColors :: Code -> [Int]
-countColors = undefined
+countColors code =
+  let counter code_ c = (length . filter (== c)) code_
+  in
+    map (counter code) colors
 
 -- Count number of matches between the actual code and the guess
 matches :: Code -> Code -> Int
-matches = undefined
+matches c1 c2 =
+  let internalMatch (x:xs) (y:ys) = min x y + internalMatch xs ys
+      internalMatch _ _           = 0
+  in
+    internalMatch  (countColors c1) (countColors c2)
 
 -- Exercise 3 -----------------------------------------
 
 -- Construct a Move from a guess given the actual code
 getMove :: Code -> Code -> Move
-getMove = undefined
+getMove secret guess =
+  let exacts    = exactMatches secret guess
+      nonexacts = matches secret guess - exacts
+  in
+    Move guess exacts nonexacts
 
 -- Exercise 4 -----------------------------------------
 
 isConsistent :: Move -> Code -> Bool
-isConsistent = undefined
+isConsistent (Move guess e ne) code
+  | newE == e && newNE == ne  = True
+  | otherwise                 = False
+  where
+    (Move _ newE newNE) = getMove code guess
 
 -- Exercise 5 -----------------------------------------
 
 filterCodes :: Move -> [Code] -> [Code]
-filterCodes = undefined
+filterCodes move = filter (isConsistent move)
 
 -- Exercise 6 -----------------------------------------
 
 allCodes :: Int -> [Code]
-allCodes = undefined
+allCodes n = replicateM n colors
 
 -- Exercise 7 -----------------------------------------
 
+solvePlus :: Code -> [Code] -> [Move]
+solvePlus _ [] = []
+solvePlus secret (x:xs)
+  | e == length secret  = [currentmove]
+  | otherwise           = currentmove : solvePlus secret (filterCodes currentmove xs)
+  where
+    currentmove = getMove secret x
+    Move _ e ne = currentmove
+
 solve :: Code -> [Move]
-solve = undefined
+solve secret =
+  let size = length secret
+      allcodes = allCodes size
+  in
+      solvePlus secret allcodes
 
 -- Bonus ----------------------------------------------
 
