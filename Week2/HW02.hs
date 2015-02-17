@@ -1,7 +1,7 @@
 {-# OPTIONS_GHC -Wall #-}
 module HW02 where
 
-import Control.Monad
+import           Control.Monad
 
 -- Mastermind -----------------------------------------
 
